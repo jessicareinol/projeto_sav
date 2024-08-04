@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+</head>
+<body>
+    <h4>Cadastro de Anúncio</h4>
+    <form action="cad_anuncio" method="post"">
+        <p><label for="titulo">Título do Anúncio</label></p>
+        <p><input type="text" id="titulo" name="titulo" required></p>
+
+        <p><label for="descricao">Descrição</label></p>
+        <p><textarea id="descricao" name="descricao" rows="4" required></textarea></p>
+
+        <p><label for="categoria">Categoria</label></p>
+        <select name="categoria">
+            <option value="cozinha">Cozinha</option>
+            <option value="eletronico">Eletrônico</option>
+            <option value="roupa">Roupa</option>
+            <option value="brinquedo">Brinquedo</option>
+        </select>
+
+        <p><label for="preco">Preço</label></p>
+        <p><input type="text" id="preco" name="preco" required></p>
+
+        <p><label for="qntd">Quantidade</label></p>
+        <p><input type="text" id="qntd" name="qntd" required></p>
+
+        <p><label for="imagem">Imagem</label></p>
+        <p><input type="file" id="imagem" name="imagem"></p>
+
+        <p><input type="submit" value="Cadastrar Anúncio"></p>
+        <p><input type="reset" value="Cancelar"></p>
+
+    </form>
+</body>
+</html>
