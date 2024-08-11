@@ -2,27 +2,51 @@
 <html>
 <head> 
     <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+    <!-- pra colocar os icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>SAV - Seu Anúncio Virtual</h1>
     </header>
 
+    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+
     <main>
         <h4>
-            Categorias            
+            Cadastro de {{titulo}}            
         </h4>
 
-        <form action="escolher_categoria" method="post" >
-            <select name="categoria">
-            <option value="cozinha">Cozinha</option>
-            <option value="eletronico">Eletrônico</option>
-            <option value="roupa">Roupa</option>
-            <option value="brinquedo">Brinquedo</option>
-            </select>
-            
-            <input type="submit" value="Selecionar">
+        <form action="/categoria/criar" method="post">
+            <p><label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome"></p>
+        
+            <p><label for="desc">Descrição</label>
+            <textarea rows="4" cols="50" id="desc" name="desc"></textarea></p>       
+        
+            <p><input type="submit" value="Cadastrar"></p>
         </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Editar</th>
+                    <th>Deletar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.nome }}</td>
+                        <td>{{ categoria.desc }}</td>
+                        <td><a href="{{ url_for('editarcategoria', id=categoria.id) }}"><i class="fas fa-edit"></i></a></td>
+                        <td><a href="{{ url_for('deletarcategoria', id=categoria.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
     </main>
 
