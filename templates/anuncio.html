@@ -1,39 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+<!doctype html>
+<html>
+<head> 
+    <title>SAV - Seu Anúncio Virtual - Cadastro de {{titulo}}</title>
+    <!-- pra colocar os icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
 <body>
-    <h4>Cadastro de Anúncio</h4>
-    <form action="cad_anuncio" method="post"">
-        <p><label for="titulo">Título do Anúncio</label></p>
-        <p><input type="text" id="titulo" name="titulo" required></p>
 
-        <p><label for="descricao">Descrição</label></p>
-        <p><textarea id="descricao" name="descricao" rows="4" required></textarea></p>
+    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
 
-        <p><label for="categoria">Categoria</label></p>
-        <select name="categoria">
-            <option value="cozinha">Cozinha</option>
-            <option value="eletronico">Eletrônico</option>
-            <option value="roupa">Roupa</option>
-            <option value="brinquedo">Brinquedo</option>
-        </select>
+    <h4>Cadastro de {{titulo}}</h4>
+    <form action="/anuncio/criar" method="post">
+        <p><label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome"></p>
 
-        <p><label for="preco">Preço</label></p>
-        <p><input type="text" id="preco" name="preco" required></p>
+        <p><label for="desc">Descrição</label>
+        <textarea rows="4" cols="50" id="desc" name="desc"></textarea></p>       
 
-        <p><label for="qntd">Quantidade</label></p>
-        <p><input type="text" id="qntd" name="qntd" required></p>
+        <p><label for="qtd">Quantidade</label>
+        <input type="text" id="qtd" name="qtd"></p>
 
-        <p><label for="imagem">Imagem</label></p>
-        <p><input type="file" id="imagem" name="imagem"></p>
+        <p><label for="preco">Preço</label>
+        <input type="text" id="preco" name="preco"></p>
+        
+        <p><label for="cat">Categoria</label>
+        <select id="cat" name="cat">
+            {% for categoria in categorias %} 
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </select></p>
 
-        <p><input type="submit" value="Cadastrar Anúncio"></p>
-        <p><input type="reset" value="Cancelar"></p>
+        <p><label for="usu">Usuario - N. Cadastro</label>
+        <input type="text" id="usu" name="usu"></p>
 
+        <p><input type="submit" value="Cadastrar"></p>
     </form>
+
+    <h4>Lista de {{titulo}}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th>Categoria</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anuncio in anuncios %}
+                <tr>
+                    <td>{{ anuncio.nome }}</td>
+                    <td>{{ anuncio.desc }}</td>
+                    <td>{{ anuncio.qtd }}</td>
+                    <td>{{ anuncio.preco }}</td>
+                    <td>{{ anuncio.cat_id }}</td>
+                    <td><a href="{{ url_for('editaranuncio', id=anuncio.id) }}"><i class="fas fa-edit"></i></a></td>
+                    <td><a href="{{ url_for('deletaranuncio', id=anuncio.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

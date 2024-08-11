@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head> 
+    <title>SAV - Seu Anúncio Virtual - Edição de {{titulo}}</title>
+</head>
+
+<body>
+
+    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+
+
+    <h4>Edição de {{titulo}}</h4>
+    <form action="/usuario/editar/{{usuario.id}} " method="post">
+        <p><label for="nome">Nome Completo</label>
+        <input type="text" id="nome" name="nome" value="{{usuario.nome}}"></p>
+
+        <p><label for="email">E-mail</label>
+        <input type="text" id="email" name="email" value="{{usuario.email}}"></p>  
+        
+        <p><label for="user">Username</label>
+        <input type="text" id="user" name="user" value="{{usuario.user}}"></p>
+
+        <p><label for="senha">Password</label>
+        <input type="text" id="senha" name="senha" value="{{usuario.senha}}"></p>
+
+        <p><label for="end">Endereço</label>
+        <input type="text" id="end" name="end" value="{{usuario.end}}"></p>
+
+        <p><label for="num">Número</label>
+        <input type="text" id="num" name="num" value="{{usuario.num}}"></p>
+
+        <p><label for="complemento">Complemento</label>
+        <input type="text" id="complemento" name="complemento" value="{{usuario.complemento}}"></p>
+
+        <p><label for="tel">Telefone</label>
+        <input type="text" id="tel" name="tel" value="{{usuario.tel}}"></p>
+        
+        <p><input type="submit" value="Alterar"></p>
+    </form>
+    <a href={{url_for("usuario")}}> Cancelar</a>
+</body>
+
+</html>

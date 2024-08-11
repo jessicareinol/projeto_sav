@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+</head>
+
+<body>
+    <header>
+        <h1>Lista de {{ titulo }}</h1>
+    </header>
+
+    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+
+
+
+    <main>
+        <h2>Lista de Respostas</h2>
+        <ul>
+            {% for resposta in respostas %}
+            <li>{{ resposta.conteudo }}</li>
+            {% else %}
+            <li>Nenhuma resposta encontrada.</li>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

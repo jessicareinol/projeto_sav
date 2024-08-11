@@ -1,23 +1,75 @@
 <!doctype html>
 <html>
 <head> 
-    <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+    <title>SAV - Seu Anúncio Virtual - Cadastro de {{titulo}}</title>
+    <!-- pra colocar os icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body>
-    <h4>{{titulo}}</h4>
-    <form action="caduser" method="post">
-        <p><label for="user">Username</label></p>
-        <p><input type="text" id="user" name="user"></p>
+    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
 
-        <p><label for="email">E-mail</label></p>
-        <p><input type="text" id="email" name="email"></p>       
+    <h4>Cadastro de {{titulo}}</h4>
+    <form action="/usuario/criar" method="post">
+        <p><label for="nome">Nome Completo</label>
+        <input type="text" id="nome" name="nome"></p>
 
-        <p><label for="passwd">Password</label></p>
-        <p><input type="text" id="passwd" name="passwd"></p>
+        <p><label for="email">E-mail</label>
+        <input type="text" id="email" name="email"></p>  
+        
+        <p><label for="user">Username</label>
+        <input type="text" id="user" name="user"></p>
+
+        <p><label for="senha">Password</label>
+        <input type="text" id="senha" name="senha"></p>
+
+        <p><label for="end">Endereço</label>
+        <input type="text" id="end" name="end"></p>
+
+        <p><label for="num">Número</label>
+        <input type="text" id="num" name="num"></p>
+
+        <p><label for="complemento">Complemento</label>
+        <input type="text" id="complemento" name="complemento"></p>
+
+        <p><label for="tel">Telefone</label>
+        <input type="text" id="tel" name="tel"></p>
         
         <p><input type="submit" value="Cadastrar"></p>
     </form>
-</body>
 
+    <h4>Lista de {{titulo}}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Username</th>
+                <th>E-mail</th>
+                <th>Senha</th>
+                <th>Endereço</th>
+                <th>Número</th>
+                <th>Complemento</th>
+                <th>Telefone</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.nome }}</td>
+                    <td>{{ usuario.user }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{{ usuario.senha }}</td>
+                    <td>{{ usuario.end }}</td>
+                    <td>{{ usuario.num }}</td>
+                    <td>{{ usuario.complemento }}</td>
+                    <td>{{ usuario.tel }}</td>
+                    <td><a href="{{ url_for('editarusuario', id=usuario.id) }}"><i class="fas fa-edit"></i></a></td>
+                    <td><a href="{{ url_for('deletarusuario', id=usuario.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
 </html>
