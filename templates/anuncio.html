@@ -1,68 +1,95 @@
 <!doctype html>
-<html>
+<html lang="pt-br">
 <head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAV - Seu Anúncio Virtual - Cadastro de {{titulo}}</title>
-    <!-- pra colocar os icones -->
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
-
 <body>
+    <div class="container mt-5">
+        <p><a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Voltar para a Página Inicial</a></p>
 
-    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+        <div class="container bg-light p-4 mt-5 col-md-8">
+            <div class="page-header text-center">
+                <h4 class="text-primary"><i class="fas fa-plus-circle"></i> Cadastro de {{titulo}}</h4>
+            </div>
 
-    <h4>Cadastro de {{titulo}}</h4>
-    <form action="/anuncio/criar" method="post">
-        <p><label for="nome">Nome</label>
-        <input type="text" id="nome" name="nome"></p>
+            <form action="/anuncio/criar" method="post">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome do anúncio">
+                </div>
 
-        <p><label for="desc">Descrição</label>
-        <textarea rows="4" cols="50" id="desc" name="desc"></textarea></p>       
+                <div class="form-group">
+                    <label for="desc">Descrição</label>
+                    <textarea rows="4" class="form-control" id="desc" name="desc" placeholder="Descrição do anúncio"></textarea>
+                </div>
 
-        <p><label for="qtd">Quantidade</label>
-        <input type="text" id="qtd" name="qtd"></p>
+                <div class="form-group">
+                    <label for="qtd">Quantidade</label>
+                    <input type="number" class="form-control" id="qtd" name="qtd" placeholder="Quantidade disponível">
+                </div>
 
-        <p><label for="preco">Preço</label>
-        <input type="text" id="preco" name="preco"></p>
-        
-        <p><label for="cat">Categoria</label>
-        <select id="cat" name="cat">
-            {% for categoria in categorias %} 
-                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
-            {% endfor %}
-        </select></p>
+                <div class="form-group">
+                    <label for="preco">Preço</label>
+                    <input type="text" class="form-control" id="preco" name="preco" placeholder="Preço do produto">
+                </div>
 
-        <p><label for="usu">Usuario - N. Cadastro</label>
-        <input type="text" id="usu" name="usu"></p>
+                <div class="form-group">
+                    <label for="cat">Categoria</label>
+                    <select class="form-control" id="cat" name="cat">
+                        {% for categoria in categorias %} 
+                            <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <p><input type="submit" value="Cadastrar"></p>
-    </form>
+                <div class="form-group">
+                    <label for="usu">Número do Usuário</label>
+                    <input type="text" class="form-control" id="usu" name="usu" placeholder="Número de cadastro do usuário">
+                </div>
 
-    <h4>Lista de {{titulo}}</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Quantidade</th>
-                <th>Preço</th>
-                <th>Categoria</th>
-                <th>Editar</th>
-                <th>Deletar</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for anuncio in anuncios %}
-                <tr>
-                    <td>{{ anuncio.nome }}</td>
-                    <td>{{ anuncio.desc }}</td>
-                    <td>{{ anuncio.qtd }}</td>
-                    <td>{{ anuncio.preco }}</td>
-                    <td>{{ anuncio.cat_id }}</td>
-                    <td><a href="{{ url_for('editaranuncio', id=anuncio.id) }}"><i class="fas fa-edit"></i></a></td>
-                    <td><a href="{{ url_for('deletaranuncio', id=anuncio.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <button type="submit" class="btn btn-success mt-3">Cadastrar</button>
+                <button type="reset" class="btn btn-outline-secondary mt-3">Limpar</button>
+            </form>
+        </div>
+
+        <div class="container mt-5">
+            <h4 class="text-primary text-center"><i class="fas fa-list"></i> Lista de {{titulo}}</h4>
+            <table class="table table-striped table-responsive table-bordered mt-3">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Quantidade</th>
+                        <th>Preço</th>
+                        <th>Categoria</th>
+                        <th>Editar</th>
+                        <th>Deletar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for anuncio in anuncios %}
+                        <tr>
+                            <td>{{ anuncio.nome }}</td>
+                            <td>{{ anuncio.desc }}</td>
+                            <td>{{ anuncio.qtd }}</td>
+                            <td>{{ anuncio.preco }}</td>
+                            <td>{{ anuncio.cat_id }}</td>
+                            <td><a href="{{ url_for('editaranuncio', id=anuncio.id) }}"><i class="fas fa-edit"></i></a></td>
+                            <td><a href="{{ url_for('deletaranuncio', id=anuncio.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>

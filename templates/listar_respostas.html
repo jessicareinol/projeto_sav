@@ -1,27 +1,32 @@
 <!doctype html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAV - Seu Anúncio Virtual - {{titulo}}</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
-
 <body>
-    <header>
-        <h1>Lista de {{ titulo }}</h1>
-    </header>
+    <div class="container mt-5">
+        <p><a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Voltar para a Página Inicial</a></p>
 
-    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+        <div class="page-header text-center">
+            <h4 class="text-primary"><i class="fas fa-reply"></i> Lista de Respostas</h4>
+        </div>
 
-
-
-    <main>
-        <h2>Lista de Respostas</h2>
-        <ul>
+        <ul class="list-group mt-3">
             {% for resposta in respostas %}
-            <li>{{ resposta.conteudo }}</li>
+                <li class="list-group-item">{{ resposta.conteudo }}</li>
             {% else %}
-            <li>Nenhuma resposta encontrada.</li>
+                <li class="list-group-item">Nenhuma resposta encontrada.</li>
             {% endfor %}
         </ul>
-    </main>
+    </div>
 </body>
 </html>

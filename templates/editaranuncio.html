@@ -2,39 +2,67 @@
 <html>
 <head> 
     <title>SAV - Seu Anúncio Virtual - Edição de {{titulo}}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body>
+    <div class="container mt-5">
+        <p><a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Voltar para a Página Inicial</a></p>
 
-    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+        <div class="container bg-light p-4 mt-5 shadow-sm rounded">
+            <div class="page-header text-center pb-3 border-bottom">
+                <h4 class="text-primary"><i class="fas fa-edit"></i> Edição de {{titulo}}</h4>
+            </div>
+            
+            <form action="/anuncio/editar/{{anuncio.id}}" method="post">
+                <div class="form-group">
+                    <label for="nome">Nome do Anúncio</label>
+                    <input type="text" class="form-control" id="nome" name="nome" value="{{anuncio.nome}}" placeholder="Digite o nome do anúncio">
+                </div>
 
-    <h4>Edição de {{titulo}}</h4>
-    <form action="/anuncio/editar/{{anuncio.id}}" method="post">
-        <p><label for="nome">Nome do Anúncio</label>
-        <input type="text" id="nome" name="nome" value="{{anuncio.nome}}"></p>
+                <div class="form-group">
+                    <label for="desc">Descrição</label>
+                    <textarea rows="4" class="form-control" id="desc" name="desc" placeholder="Digite a descrição do anúncio">{{anuncio.desc}}</textarea>
+                </div>
 
-        <p><label for="desc">Descrição</label>
-        <input type="text" id="desc" name="desc" value="{{anuncio.desc}}"></p>  
-        
-        <p><label for="qtd">Quantidade</label>
-        <input type="number" id="qtd" name="qtd" value="{{anuncio.qtd}}"></p>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="qtd">Quantidade</label>
+                        <input type="number" class="form-control" id="qtd" name="qtd" value="{{anuncio.qtd}}" placeholder="Digite a quantidade">
+                    </div>
 
-        <p><label for="preco">Preço</label>
-        <input type="text" id="preco" name="preco" value="{{anuncio.preco}}"></p>
+                    <div class="form-group col-md-6">
+                        <label for="preco">Preço</label>
+                        <input type="text" class="form-control" id="preco" name="preco" value="{{anuncio.preco}}" placeholder="Digite o preço">
+                    </div>
+                </div>
 
-        <p><label for="cat_id">Categoria</label>
-        <select id="cat_id" name="cat_id">
-            {% for categoria in categorias %}
-                <option value="{{categoria.id}}" {% if categoria.id == anuncio.cat_id %}selected{% endif %}>{{categoria.nome}}</option>
-            {% endfor %}
-        </select></p>
+                <div class="form-group">
+                    <label for="cat_id">Categoria</label>
+                    <select class="form-control" id="cat_id" name="cat_id">
+                        {% for categoria in categorias %}
+                            <option value="{{categoria.id}}" {% if categoria.id == anuncio.cat_id %}selected{% endif %}>{{categoria.nome}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <p><label for="usu_id">Usuário</label>
-        <input type="text" id="usu_id" name="usu_id" value="{{anuncio.usu_id}}"></p>
+                <div class="form-group">
+                    <label for="usu_id">Usuário</label>
+                    <input type="text" class="form-control" id="usu_id" name="usu_id" value="{{anuncio.usu_id}}" placeholder="Digite o ID do usuário">
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Alterar</button>
+                    <a href="{{ url_for('anuncio') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <p><input type="submit" value="Alterar"></p>
-    </form>
-    <a href={{url_for("anuncio")}}> Cancelar</a>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
-
 </html>
