@@ -314,3 +314,4 @@ def relCompras():
 if __name__ == 'sav':
     with app.app_context():
         db.create_all()
+
