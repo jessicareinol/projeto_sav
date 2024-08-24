@@ -1,75 +1,116 @@
 <!doctype html>
-<html>
+<html lang="pt-br">
 <head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAV - Seu Anúncio Virtual - Cadastro de {{titulo}}</title>
-    <!-- pra colocar os icones -->
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
-
 <body>
-    <p><a href="{{ url_for('index') }}">Voltar para a Página Inicial</a></p>
+    <div class="container mt-5">
+        <p><a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Voltar para a Página Inicial</a></p>
 
-    <h4>Cadastro de {{titulo}}</h4>
-    <form action="/usuario/criar" method="post">
-        <p><label for="nome">Nome Completo</label>
-        <input type="text" id="nome" name="nome"></p>
+        <div class="container mt-5 bg-light p-4 rounded shadow-sm">
+            <div class="page-header text-center">
+                <h4 class="text-primary"><i class="fas fa-user-plus"></i> Cadastro de {{titulo}}</h4>    
+            </div>
 
-        <p><label for="email">E-mail</label>
-        <input type="text" id="email" name="email"></p>  
-        
-        <p><label for="user">Username</label>
-        <input type="text" id="user" name="user"></p>
+            <form action="/usuario/criar" method="post">
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Seu nome completo">
+                </div>
 
-        <p><label for="senha">Password</label>
-        <input type="text" id="senha" name="senha"></p>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="exemplo@dominio.com">
+                </div>
 
-        <p><label for="end">Endereço</label>
-        <input type="text" id="end" name="end"></p>
+                <div class="form-group">
+                    <label for="user">Username</label>
+                    <input type="text" class="form-control" id="user" name="user" placeholder="Escolha um nome de usuário">
+                </div>
 
-        <p><label for="num">Número</label>
-        <input type="text" id="num" name="num"></p>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" class="form-control" id="senha" name="senha" placeholder="Escolha uma senha">
+                </div>
 
-        <p><label for="complemento">Complemento</label>
-        <input type="text" id="complemento" name="complemento"></p>
+                <div class="form-group">
+                    <label for="end">Endereço</label>
+                    <input type="text" class="form-control" id="end" name="end" placeholder="Rua, Avenida, etc.">
+                </div>
 
-        <p><label for="tel">Telefone</label>
-        <input type="text" id="tel" name="tel"></p>
-        
-        <p><input type="submit" value="Cadastrar"></p>
-    </form>
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="num">Número</label>
+                        <input type="text" class="form-control" id="num" name="num" placeholder="123">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="complemento">Complemento</label>
+                        <input type="text" class="form-control" id="complemento" name="complemento" placeholder="Apartamento, casa, etc.">
+                    </div>
+                </div>
 
-    <h4>Lista de {{titulo}}</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Username</th>
-                <th>E-mail</th>
-                <th>Senha</th>
-                <th>Endereço</th>
-                <th>Número</th>
-                <th>Complemento</th>
-                <th>Telefone</th>
-                <th>Editar</th>
-                <th>Deletar</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario in usuarios %}
-                <tr>
-                    <td>{{ usuario.nome }}</td>
-                    <td>{{ usuario.user }}</td>
-                    <td>{{ usuario.email }}</td>
-                    <td>{{ usuario.senha }}</td>
-                    <td>{{ usuario.end }}</td>
-                    <td>{{ usuario.num }}</td>
-                    <td>{{ usuario.complemento }}</td>
-                    <td>{{ usuario.tel }}</td>
-                    <td><a href="{{ url_for('editarusuario', id=usuario.id) }}"><i class="fas fa-edit"></i></a></td>
-                    <td><a href="{{ url_for('deletarusuario', id=usuario.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <div class="form-group">
+                    <label for="tel">Telefone</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="tel" name="tel" placeholder="(11) 99999-9999">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success mt-3">Cadastrar</button>
+                <button type="reset" class="btn btn-outline-secondary mt-3">Limpar</button>
+            </form>
+        </div>
+
+        <div class="container mt-5 bg-light p-4 rounded shadow-sm">
+            <div class="page-header text-center">
+                <h4 class="text-info"><i class="fas fa-list"></i> Lista de {{titulo}}</h4>    
+            </div>
+
+            <table class="table table-striped table-responsive table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Username</th>
+                        <th>E-mail</th>
+                        <th>Senha</th>
+                        <th>Endereço</th>
+                        <th>Número</th>
+                        <th>Complemento</th>
+                        <th>Telefone</th>
+                        <th>Editar</th>
+                        <th>Deletar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.nome }}</td>
+                            <td>{{ usuario.user }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.senha }}</td>
+                            <td>{{ usuario.end }}</td>
+                            <td>{{ usuario.num }}</td>
+                            <td>{{ usuario.complemento }}</td>
+                            <td>{{ usuario.tel }}</td>
+                            <td><a href="{{ url_for('editarusuario', id=usuario.id) }}"><i class="fas fa-edit"></i></a></td>
+                            <td><a href="{{ url_for('deletarusuario', id=usuario.id) }}" onclick="return confirm('Tem certeza que deseja deletar?');"><i class="fas fa-trash"></i></a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>

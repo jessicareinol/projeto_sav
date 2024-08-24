@@ -5,6 +5,10 @@ from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from flask import redirect
 from flask import url_for
+from flask_login import (current_user, LoginManager,
+                             login_user, logout_user,
+                             login_required)
+import hashlib
 
 
 app = Flask(__name__)
@@ -12,6 +16,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://testeuser:toledo22@localhost:33
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+app.secret_key = 'framework'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 class Usuario(db.Model):
     id = db.Column('usu_id', db.Integer, primary_key=True)
@@ -34,6 +43,19 @@ class Usuario(db.Model):
         self.num = num
         self.complemento = complemento
         self.tel = tel
+
+    #integrando com o login_manager
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
 
 class Categoria(db.Model):
     __tablename__ = "categoria"
@@ -94,20 +116,47 @@ class Resposta(db.Model):
 def paginanaoencontrada(error):
     return render_template('paginanaoencontrada.html')
 
+@login_manager.user_loader
+def load_user(id):
+    return Usuario.query.get(id)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
+
+        user = Usuario.query.filter_by(email=email, senha=senha).first()
+
+        if user:
+            login_user(user)
+            return redirect(url_for('index'))
+        else:
+            return redirect(url_for('login'))
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
 @app.route("/")
 def index():
     return render_template('index.html')
 
 @app.route("/cad/usuario")
+@login_required
 def usuario():
     return render_template('usuario.html', usuarios = Usuario.query.all (), titulo="Usuário")
 
 @app.route("/usuario/criar", methods=['POST'])
+@login_required
 def criarusuario():
+    hash = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
     usuario = Usuario(request.form.get('nome'),
                       request.form.get('email'),
                       request.form.get('user'),
-                      request.form.get('senha'),
+                      hash, #salvar a senha
                       request.form.get('end'),
                       request.form.get('num'),
                       request.form.get('complemento'),
@@ -126,13 +175,14 @@ def buscarusuario(id):
         return "Usuário não encontrado", 404
     
 @app.route("/usuario/editar/<int:id>", methods=['GET', 'POST'])
+@login_required
 def editarusuario(id):
     usuario = Usuario.query.get(id)
     if request.method == 'POST':
         usuario.nome = request.form.get('nome')
         usuario.email = request.form.get('email'),
         usuario.user = request.form.get('user'),
-        usuario.senha = request.form.get('senha'),
+        usuario.senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest(),
         usuario.end = request.form.get('end'),
         usuario.num = request.form.get('num'),
         usuario.complemento = request.form.get('complemento'),
@@ -144,6 +194,7 @@ def editarusuario(id):
     return render_template('editarusuario.html', usuario = usuario, titulo="Usuario")   
 
 @app.route("/usuario/deletar/<int:id>")
+@login_required
 def deletarusuario(id):
     usuario = Usuario.query.get(id)
     db.session.delete(usuario)
@@ -151,10 +202,12 @@ def deletarusuario(id):
     return redirect(url_for('usuario'))
 
 @app.route("/cad/anuncio")
+@login_required
 def anuncio():
     return render_template('anuncio.html', anuncios = Anuncio.query.all(), categorias = Categoria.query.all(), titulo="Anuncio")
 
 @app.route("/anuncio/criar", methods=['POST'])
+@login_required
 def criaranuncio():
     anuncio = Anuncio(request.form.get('nome'),
                       request.form.get('desc'),
@@ -167,6 +220,7 @@ def criaranuncio():
     return redirect(url_for('anuncio'))
 
 @app.route("/anuncio/editar/<int:id>", methods=['GET', 'POST'])
+@login_required
 def editaranuncio(id):
     anuncio = Anuncio.query.get(id)
     if request.method == 'POST':
@@ -183,6 +237,7 @@ def editaranuncio(id):
     return render_template('editaranuncio.html', anuncio=anuncio, categorias=Categoria.query.all(), usuarios=Usuario.query.all(), titulo="Editar Anúncio")
 
 @app.route("/anuncio/deletar/<int:id>")
+@login_required
 def deletaranuncio(id):
     anuncio = Anuncio.query.get(id)
     db.session.delete(anuncio)
@@ -211,10 +266,12 @@ def favoritos():
     return f"<h4>Favorito adicionado com sucesso!</h4>"
 
 @app.route("/config/categoria")
+@login_required
 def categoria():
     return render_template('categoria.html', categorias = Categoria.query.all(), titulo='Categoria')
 
 @app.route("/categoria/criar", methods=['POST'])
+@login_required
 def criarcategoria():
     categoria = Categoria(request.form.get('nome'), request.form.get('desc'))
     db.session.add(categoria)
@@ -222,6 +279,7 @@ def criarcategoria():
     return redirect(url_for('categoria'))
 
 @app.route("/categoria/editar/<int:id>", methods=['GET', 'POST'])
+@login_required
 def editarcategoria(id):
     categoria = Categoria.query.get(id)
     if request.method == 'POST':
@@ -235,6 +293,7 @@ def editarcategoria(id):
 
 
 @app.route("/categoria/deletar/<int:id>")
+@login_required
 def deletarcategoria(id):
     categoria = Categoria.query.get(id)
     db.session.delete(categoria)
@@ -243,10 +302,12 @@ def deletarcategoria(id):
 
 
 @app.route("/relatorios/vendas")
+@login_required
 def relVendas():
     return render_template('relVendas.html', titulo="Relatório de Vendas")
 
 @app.route("/relatorios/compras")
+@login_required
 def relCompras():
     return render_template('relCompras.html', titulo="Relatório de Compras")
 
