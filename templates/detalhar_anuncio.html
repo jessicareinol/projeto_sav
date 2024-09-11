@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAV - Seu Anúncio Virtual - Detalhes do Anúncio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <p><a href="{{ url_for('listar_anuncios') }}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Voltar para a Lista de Anúncios</a></p>
+
+        <div class="page-header text-center">
+            <h4 class="text-primary"><i class="fas fa-info-circle"></i> Detalhes do Anúncio</h4>
+        </div>
+
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ anuncio.nome }}</h5>
+                <p class="card-text"><strong>Descrição:</strong> {{ anuncio.desc }}</p>
+                <p class="card-text"><strong>Quantidade:</strong> {{ anuncio.qtd }}</p>
+                <p class="card-text"><strong>Preço:</strong> R$ {{ "%.2f"|format(anuncio.preco) }}</p>
+                {% if anuncio.imagem %}
+                    <img src="{{ url_for('static', filename=anuncio.imagem) }}" class="img-fluid" alt="{{ anuncio.nome }}">
+                {% else %}
+                    <p>Imagem não disponível</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- perguntas/respostas -->
+        <div class="mt-4">
+            <h5>Perguntas e Respostas</h5>
+            {% if perguntas %}
+                <ul class="list-group">
+                    {% for pergunta in perguntas %}
+                        <li class="list-group-item">
+                            <strong>Pergunta:</strong> {{ pergunta.conteudo }}
+                            {% set resposta = respostas|selectattr('perg_id', 'equalto', pergunta.id)|first %}
+                            {% if resposta %}
+                                <p><strong>Resposta:</strong> {{ resposta.conteudo }}</p>
+                            {% else %}
+                                <p class="text-danger">Não há uma resposta para esta pergunta.</p>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-dark">Não há nenhuma pergunta.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

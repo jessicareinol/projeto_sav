@@ -1,22 +1,17 @@
-from flask import Flask, make_response
-from markupsafe import escape
-from flask import render_template
-from flask import request
+from flask import Flask, make_response, render_template, request, redirect, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from flask import redirect
-from flask import url_for
-from flask_login import (current_user, LoginManager,
-                             login_user, logout_user,
-                             login_required)
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import hashlib
-
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://testeuser:toledo22@localhost:3306/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/img'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  #limite arquivo para 16mb
 
 db = SQLAlchemy(app)
-
 app.secret_key = 'framework'
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -33,7 +28,6 @@ class Usuario(db.Model):
     complemento = db.Column('usu_complemento', db.String(256))
     tel = db.Column('usu_tel', db.String(256))
 
-
     def __init__(self, nome, email, user, senha, end, num, complemento, tel):
         self.nome = nome
         self.email = email
@@ -44,7 +38,6 @@ class Usuario(db.Model):
         self.complemento = complemento
         self.tel = tel
 
-    #integrando com o login_manager
     def is_authenticated(self):
         return True
 
@@ -63,9 +56,12 @@ class Categoria(db.Model):
     nome = db.Column('cat_nome', db.String(256))
     desc = db.Column('cat_desc', db.String(256))
 
-    def __init__ (self, nome, desc):
+    anuncios = db.relationship('Anuncio', backref='categoria', lazy=True)
+
+    def __init__(self, nome, desc):
         self.nome = nome
         self.desc = desc
+
 
 class Anuncio(db.Model):
     __tablename__ = "anuncio"
@@ -74,17 +70,18 @@ class Anuncio(db.Model):
     desc = db.Column('anu_desc', db.String(256))
     qtd = db.Column('anu_qtd', db.Integer)
     preco = db.Column('anu_preco', db.Float)
-    cat_id = db.Column('cat_id',db.Integer, db.ForeignKey("categoria.cat_id"))
-    usu_id = db.Column('usu_id',db.Integer, db.ForeignKey("usuario.usu_id"))
+    cat_id = db.Column('cat_id', db.Integer, db.ForeignKey("categoria.cat_id"))
+    usu_id = db.Column('usu_id', db.Integer, db.ForeignKey("usuario.usu_id"))
+    imagem = db.Column('anu_imagem', db.String(255), nullable=True)
 
-    def __init__(self, nome, desc, qtd, preco, cat_id, usu_id):
+    def __init__(self, nome, desc, qtd, preco, cat_id, usu_id, imagem=None):
         self.nome = nome
         self.desc = desc
         self.qtd = qtd
         self.preco = preco
         self.cat_id = cat_id
         self.usu_id = usu_id
-
+        self.imagem = imagem
 
 class Pergunta(db.Model):
     __tablename__ = "pergunta"
@@ -94,11 +91,12 @@ class Pergunta(db.Model):
     anu_id = db.Column('anu_id', db.Integer, db.ForeignKey("anuncio.anu_id"))
     usu_id = db.Column('usu_id', db.Integer, db.ForeignKey("usuario.usu_id"))
 
+    anuncio = db.relationship('Anuncio', backref='perguntas')
+
     def __init__(self, conteudo, anu_id, usu_id):
         self.conteudo = conteudo
         self.anu_id = anu_id
         self.usu_id = usu_id
-
 
 class Resposta(db.Model):
     __tablename__ = "resposta"
@@ -106,6 +104,9 @@ class Resposta(db.Model):
     conteudo = db.Column('resp_conteudo', db.String(512))
     data = db.Column('resp_data', db.DateTime, default=db.func.current_timestamp())
     perg_id = db.Column('perg_id', db.Integer, db.ForeignKey("pergunta.perg_id"))
+
+    #relacionando as tabelas
+    pergunta = db.relationship('Pergunta', backref='respostas')
 
     def __init__(self, conteudo, perg_id):
         self.conteudo = conteudo
@@ -125,9 +126,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
-
         user = Usuario.query.filter_by(email=email, senha=senha).first()
-
         if user:
             login_user(user)
             return redirect(url_for('index'))
@@ -140,14 +139,15 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template('index.html')
+    anuncios = Anuncio.query.all()
+    return render_template('index.html', anuncios=anuncios)
 
 @app.route("/cad/usuario")
 @login_required
 def usuario():
-    return render_template('usuario.html', usuarios = Usuario.query.all (), titulo="Usuário")
+    return render_template('usuario.html', usuarios=Usuario.query.all(), titulo="Usuário")
 
 @app.route("/usuario/criar", methods=['POST'])
 @login_required
@@ -156,7 +156,7 @@ def criarusuario():
     usuario = Usuario(request.form.get('nome'),
                       request.form.get('email'),
                       request.form.get('user'),
-                      hash, #salvar a senha
+                      hash,  #salvar a senha
                       request.form.get('end'),
                       request.form.get('num'),
                       request.form.get('complemento'),
@@ -173,25 +173,25 @@ def buscarusuario(id):
         return usuario.nome
     else:
         return "Usuário não encontrado", 404
-    
+
 @app.route("/usuario/editar/<int:id>", methods=['GET', 'POST'])
 @login_required
 def editarusuario(id):
     usuario = Usuario.query.get(id)
     if request.method == 'POST':
         usuario.nome = request.form.get('nome')
-        usuario.email = request.form.get('email'),
-        usuario.user = request.form.get('user'),
-        usuario.senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest(),
-        usuario.end = request.form.get('end'),
-        usuario.num = request.form.get('num'),
-        usuario.complemento = request.form.get('complemento'),
+        usuario.email = request.form.get('email')
+        usuario.user = request.form.get('user')
+        usuario.senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
+        usuario.end = request.form.get('end')
+        usuario.num = request.form.get('num')
+        usuario.complemento = request.form.get('complemento')
         usuario.tel = request.form.get('tel')
         db.session.add(usuario)
         db.session.commit()
         return redirect(url_for('usuario'))
-    
-    return render_template('editarusuario.html', usuario = usuario, titulo="Usuario")   
+
+    return render_template('editarusuario.html', usuario=usuario, titulo="Usuário")
 
 @app.route("/usuario/deletar/<int:id>")
 @login_required
@@ -204,17 +204,26 @@ def deletarusuario(id):
 @app.route("/cad/anuncio")
 @login_required
 def anuncio():
-    return render_template('anuncio.html', anuncios = Anuncio.query.all(), categorias = Categoria.query.all(), titulo="Anuncio")
+    return render_template('anuncio.html', anuncios=Anuncio.query.all(), categorias=Categoria.query.all(), titulo="Anúncio")
 
 @app.route("/anuncio/criar", methods=['POST'])
 @login_required
 def criaranuncio():
+    imagem = request.files.get('imagem')
+    filename = None
+    if imagem:
+        filename = secure_filename(imagem.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        imagem.save(filepath)  #salvar a imagem na pasta
+        print(f"Imagem salva em: {filepath}")  # Debugging: Verifique se o arquivo foi salvo corretamente
+    
     anuncio = Anuncio(request.form.get('nome'),
                       request.form.get('desc'),
                       request.form.get('qtd'),
                       request.form.get('preco'),
                       request.form.get('cat'),
-                      request.form.get('usu'))
+                      current_user.id,  #id do usuário logado
+                      f'img/{filename}' if filename else None)
     db.session.add(anuncio)
     db.session.commit()
     return redirect(url_for('anuncio'))
@@ -228,32 +237,128 @@ def editaranuncio(id):
         anuncio.desc = request.form.get('desc')
         anuncio.qtd = request.form.get('qtd')
         anuncio.preco = request.form.get('preco')
-        anuncio.cat_id = request.form.get('cat')
-        anuncio.usu_id = request.form.get('usu')
-        db.session.add(anuncio)
-        db.session.commit()
+        anuncio.cat_id = request.form.get('cat_id')
+        anuncio.usu_id = current_user.id  
+        
+        imagem = request.files.get('imagem')
+        if imagem:
+            #apaga a img antiga, se existir
+            if anuncio.imagem:
+                try:
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], anuncio.imagem.split('/')[-1]))
+                except Exception as e:
+                    print(f"Erro ao tentar remover imagem: {e}")
+            
+            filename = secure_filename(imagem.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            imagem.save(filepath)  #salva a nova
+            anuncio.imagem = f'img/{filename}' 
+        
+        db.session.commit()  #juntas as alterações
         return redirect(url_for('anuncio'))
 
-    return render_template('editaranuncio.html', anuncio=anuncio, categorias=Categoria.query.all(), usuarios=Usuario.query.all(), titulo="Editar Anúncio")
+    return render_template('editaranuncio.html', anuncio=anuncio, categorias=Categoria.query.all(), titulo="Editar Anúncio")
 
 @app.route("/anuncio/deletar/<int:id>")
 @login_required
 def deletaranuncio(id):
     anuncio = Anuncio.query.get(id)
+    if anuncio.imagem:
+        try:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], anuncio.imagem.split('/')[-1]))
+        except Exception as e:
+            print(f"Erro ao tentar remover imagem: {e}")
     db.session.delete(anuncio)
     db.session.commit()
     return redirect(url_for('anuncio'))
 
-@app.route("/perguntas")
+@app.route('/upload', methods=['POST']) #rpta pra colocar imgs
+def upload_file():
+    if 'file' not in request.files:
+        return "Nenhum arquivo enviado", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "Nenhum arquivo selecionado", 400
+    if file:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('listar_anuncios'))
+
+@app.route('/anuncios')
+def listar_anuncios():
+    categorias = Categoria.query.all()
+    anuncios_por_categoria = {categoria.id: Anuncio.query.filter_by(cat_id=categoria.id).all() for categoria in categorias}
+    return render_template('listar_anuncio.html', categorias=categorias, anuncios_por_categoria=anuncios_por_categoria)
+
+@app.route('/anuncio/<int:anuncio_id>')
+def detalhar_anuncio(anuncio_id):
+    anuncio = Anuncio.query.get_or_404(anuncio_id)
+    perguntas = Pergunta.query.filter_by(anu_id=anuncio_id).all()
+    respostas = Resposta.query.join(Pergunta).filter(Pergunta.anu_id == anuncio_id).all()
+
+    return render_template(
+        'detalhar_anuncio.html',
+        anuncio=anuncio,
+        perguntas=perguntas,
+        respostas=respostas
+    )
+
+@app.route('/perguntas')
 def listar_perguntas():
     perguntas = Pergunta.query.all()
-    return render_template('listar_perguntas.html', perguntas=perguntas, titulo="Perguntas")
+    anuncios = Anuncio.query.all()
+    return render_template('listar_perguntas.html', perguntas=perguntas, anuncios=anuncios)
 
-@app.route("/respostas")
+@app.route('/criarpergunta', methods=['POST'])
+@login_required
+def criarpergunta():
+    conteudo = request.form.get('conteudo')
+    anuncio_id = request.form.get('anuncio')
+    usu_id = current_user.id  
+    
+    if conteudo and anuncio_id:
+        #criar e salvar pergunta no banco de dados
+        nova_pergunta = Pergunta(conteudo=conteudo, anu_id=anuncio_id, usu_id=usu_id)
+        db.session.add(nova_pergunta)
+        db.session.commit()
+        
+        return redirect(url_for('listar_perguntas'))
+    else:
+        #se faltar algum campo, redireciona ou exibe msg de erro
+        return "Erro ao criar a pergunta", 400
+
+@app.route('/respostas/<int:pergunta_id>')
+def listar_respostas_por_pergunta(pergunta_id):
+    perguntas = Pergunta.query.all()
+    respostas = Resposta.query.filter_by(perg_id=pergunta_id).all()
+    return render_template('listar_respostas.html', respostas=respostas, pergunta_id=pergunta_id, perguntas=perguntas)
+
+
+@app.route('/respostas', methods=['GET', 'POST'])
 def listar_respostas():
+    perguntas = Pergunta.query.all()
     respostas = Resposta.query.all()
-    return render_template('listar_respostas.html', respostas=respostas, titulo="Respostas")
+    
+    if request.method == 'POST':
+        conteudo = request.form['conteudo']
+        pergunta_id = request.form['pergunta']
+        nova_resposta = Resposta(conteudo=conteudo, perg_id=pergunta_id)  
+        db.session.add(nova_resposta)
+        db.session.commit()
+        return redirect(url_for('listar_respostas'))
+    
+    return render_template('listar_respostas.html', respostas=respostas, perguntas=perguntas, titulo="Respostas")
 
+@app.route('/criarresposta', methods=['POST'])
+def criarresposta():
+    conteudo = request.form['conteudo']
+    pergunta_id = request.form['pergunta'] 
+    
+    nova_resposta = Resposta(conteudo=conteudo, perg_id=pergunta_id) 
+    db.session.add(nova_resposta)
+    db.session.commit()
+    
+    return redirect(url_for('listar_respostas'))
 
 @app.route("/anuncios/compra")
 def compra():
@@ -268,7 +373,7 @@ def favoritos():
 @app.route("/config/categoria")
 @login_required
 def categoria():
-    return render_template('categoria.html', categorias = Categoria.query.all(), titulo='Categoria')
+    return render_template('categoria.html', categorias=Categoria.query.all(), titulo='Categoria')
 
 @app.route("/categoria/criar", methods=['POST'])
 @login_required
@@ -291,7 +396,6 @@ def editarcategoria(id):
 
     return render_template('editarcategoria.html', categoria=categoria, titulo="Editar Categoria")
 
-
 @app.route("/categoria/deletar/<int:id>")
 @login_required
 def deletarcategoria(id):
@@ -299,7 +403,6 @@ def deletarcategoria(id):
     db.session.delete(categoria)
     db.session.commit()
     return redirect(url_for('categoria'))
-
 
 @app.route("/relatorios/vendas")
 @login_required
@@ -311,7 +414,10 @@ def relVendas():
 def relCompras():
     return render_template('relCompras.html', titulo="Relatório de Compras")
 
-if __name__ == 'sav':
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-
