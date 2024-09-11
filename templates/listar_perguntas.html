@@ -20,13 +20,44 @@
             <h4 class="text-primary"><i class="fas fa-question-circle"></i> Lista de Perguntas</h4>
         </div>
 
-        <ul class="list-group mt-3">
-            {% for pergunta in perguntas %}
-                <li class="list-group-item">{{ pergunta.conteudo }}</li>
-            {% else %}
-                <li class="list-group-item">Nenhuma pergunta encontrada.</li>
-            {% endfor %}
-        </ul>
+        <!-- pra fazer pergunta -->
+        <div class="mb-4">
+            <h5>Adicionar Nova Pergunta</h5>
+            <form action="{{ url_for('criarpergunta') }}" method="POST">
+                <div class="mb-3">
+                    <label for="conteudo" class="form-label">Pergunta:</label>
+                    <textarea id="conteudo" name="conteudo" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="anuncio" class="form-label">Anúncio:</label>
+                    <select id="anuncio" name="anuncio" class="form-select" required>
+                        {% for anuncio in anuncios %}
+                        <option value="{{ anuncio.id }}">{{ anuncio.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar Pergunta</button>
+            </form>
+        </div>
+
+        <!-- botão -->
+        <div class="mb-4 text-center">
+            <a href="{{ url_for('listar_respostas') }}" class="btn btn-secondary">Ver Todas as Respostas</a>
+        </div>
+        
+        <!-- mostrar as perguntas feitas nos anuncios --> 
+        {% if perguntas %}
+            <ul class="list-group">
+                {% for pergunta in perguntas %}
+                    <li class="list-group-item">
+                        <h5>{{ pergunta.conteudo }}</h5>
+                        <p><strong>Para o anúncio:</strong> {{ pergunta.anuncio.nome }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nenhuma pergunta encontrada.</p>
+        {% endif %}
     </div>
 </body>
 </html>

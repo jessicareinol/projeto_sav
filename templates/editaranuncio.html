@@ -16,7 +16,7 @@
                 <h4 class="text-primary"><i class="fas fa-edit"></i> Edição de {{titulo}}</h4>
             </div>
             
-            <form action="/anuncio/editar/{{anuncio.id}}" method="post">
+            <form action="/anuncio/editar/{{anuncio.id}}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="nome">Nome do Anúncio</label>
                     <input type="text" class="form-control" id="nome" name="nome" value="{{anuncio.nome}}" placeholder="Digite o nome do anúncio">
@@ -48,6 +48,15 @@
                     </select>
                 </div>
 
+                <div class="form-group"></div>
+                    <label for="imagem">Imagem:</label>
+                    <input class="form-control1" type="file" id="imagem" name="imagem">
+                    {% if anuncio.imagem %}
+                    <p>Imagem atual:</p>
+                    <img src="{{ url_for('uploaded_file', filename=anuncio.imagem.split('/')[-1]) }}" alt="Imagem do anúncio" width="100">
+                    {% endif %}
+                </div>
+
                 <div class="form-group">
                     <label for="usu_id">Usuário</label>
                     <input type="text" class="form-control" id="usu_id" name="usu_id" value="{{anuncio.usu_id}}" placeholder="Digite o ID do usuário">
@@ -62,5 +71,6 @@
     </div>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
 </body>
 </html>

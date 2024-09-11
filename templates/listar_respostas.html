@@ -20,13 +20,39 @@
             <h4 class="text-primary"><i class="fas fa-reply"></i> Lista de Respostas</h4>
         </div>
 
+        <!-- pra fazer resposta -->
+        <div class="mb-4">
+            <h5>Adicionar Nova Resposta</h5>
+            <form action="{{ url_for('criarresposta') }}" method="POST">
+                <div class="mb-3">
+                    <label for="conteudo" class="form-label">Resposta:</label>
+                    <textarea id="conteudo" name="conteudo" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="pergunta" class="form-label">Pergunta:</label>
+                    <select id="pergunta" name="pergunta" class="form-select" required>
+                        {% for pergunta in perguntas %}
+                        <option value="{{ pergunta.id }}">{{ pergunta.conteudo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+            </form>
+        </div>
+
+        <!-- lista de respostas -->
         <ul class="list-group mt-3">
             {% for resposta in respostas %}
-                <li class="list-group-item">{{ resposta.conteudo }}</li>
+                <li class="list-group-item">
+                    <strong>Resposta:</strong> {{ resposta.conteudo }} <br>
+                    <strong>Pergunta:</strong> {{ resposta.pergunta.conteudo }} <br>
+                    <strong>Data:</strong> {{ resposta.data.strftime('%d/%m/%Y %H:%M:%S') }}
+                </li>
             {% else %}
                 <li class="list-group-item">Nenhuma resposta encontrada.</li>
             {% endfor %}
         </ul>
+
     </div>
 </body>
 </html>
