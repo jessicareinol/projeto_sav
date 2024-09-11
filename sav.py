@@ -215,7 +215,7 @@ def criaranuncio():
         filename = secure_filename(imagem.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         imagem.save(filepath)  #salvar a imagem na pasta
-        print(f"Imagem salva em: {filepath}")  # Debugging: Verifique se o arquivo foi salvo corretamente
+        print(f"Imagem salva em: {filepath}")  # testando se a img foi salva corretamente
     
     anuncio = Anuncio(request.form.get('nome'),
                       request.form.get('desc'),
